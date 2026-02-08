@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
 
-    repomix-tools.url = "git+file:../../flakes/repomix-tools";
+    repomix-tools.url = "git+file:///Users/rgb/flakes/repomix-tools";
   };
 
   outputs = { self, nixpkgs, flake-utils, repomix-tools }:

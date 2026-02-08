@@ -1,0 +1,26 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "output": {
+    "filePath": "repomix-output-wiki-server.md",
+    "style": "markdown",
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "includeFullDirectoryStructure": true
+  },
+  "include": ["**/*"],
+  "ignore": {
+    "useGitignore": false,
+    "useDotIgnore": false,
+    "useDefaultPatterns": false,
+    "customPatterns": [
+      ".git/**",
+      ".direnv/**",
+      "node_modules/**",
+      "result/**",
+      "data/**",
+      "*.log",
+      "**/.DS_Store"
+    ]
+  }
+}

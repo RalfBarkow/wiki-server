@@ -4,9 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
+
+    repomix-tools.url = "path:/Users/rgb/flakes/repomix-tools";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-utils, repomix-tools }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -14,15 +16,24 @@
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.nodejs_20
-            pkgs.nodePackages.repomix
             pkgs.git
-            pkgs.ripgrep
             pkgs.jq
-            pkgs.coreutils
-            pkgs.findutils
+
+            # Nix-pure Repomix tooling (real repomix binary)
+            repomix-tools.packages.${system}.repomix
+            repomix-tools.packages.${system}.repomix-pack-md
+            repomix-tools.packages.${system}.repomix-pack-remote-md
           ];
+
           shellHook = ''
-            echo "🔧 wiki-server dev shell ready"
+            echo
+            echo "wiki-server devShell"
+            echo
+            echo "Repomix (Nix-pure):"
+            echo "  • repomix --version"
+            echo "  • repomix-pack-md [output.md]"
+            echo "  • repomix-pack-remote-md <url> [out]"
+            echo
           '';
         };
       });

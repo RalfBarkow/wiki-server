@@ -2,6 +2,7 @@
 *.swp
 *.iml
 .idea/
+.direnv/
 .sass-cache
 .rvmrc
 config.json
@@ -12,3 +13,4 @@ node_modules
 npm-debug.log
 temp
 coverage
+repomix-output-wiki-server.md

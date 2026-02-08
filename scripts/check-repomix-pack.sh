@@ -11,39 +11,26 @@ OUT="repomix-output-wiki-server.md"
 test -f "$CONFIG"
 test -f package-lock.json
 
-# Prefer a local repomix binary (node_modules) to avoid npx network hangs.
-run_repomix () {
-  # CLI is `repomix` (no repomix-md). Markdown output is controlled by
-  # repomix.config.json output.style and output.filePath.
-  if [[ -x "./node_modules/.bin/repomix" ]]; then
-    ./node_modules/.bin/repomix -c "$CONFIG"
-    return
-  fi
+# CLI is `repomix` (no repomix-md). Markdown output is controlled by
+# repomix.config.json output.style and output.filePath.
 
-  # If repomix is available on PATH (e.g. nix shell), use it.
-  if command -v repomix >/dev/null 2>&1; then
-    repomix -c "$CONFIG"
-    return
-  fi
-
-  # Fail fast only if repomix-md is present BUT repomix is NOT.
-  if command -v repomix-md >/dev/null 2>&1 && ! command -v repomix >/dev/null 2>&1 && [[ ! -x "./node_modules/.bin/repomix" ]]; then
-    echo "ERROR: repomix-md found but repomix CLI is required." >&2
-    echo "Hint: install repomix (npm i -D repomix) or provide it via nix shell; repomix-md is not accepted here." >&2
-    exit 3
-  fi
-
-  # As last resort, use npx but force offline + no install attempts.
-  # This will FAIL FAST if repomix isn't already available in cache.
-  if command -v npx >/dev/null 2>&1; then
-    npx --no-install repomix -c "$CONFIG"
-    return
-  fi
-
+# Determine repomix command (argv array), prefer local binary.
+REPOMIX_CMD=()
+if [[ -x "./node_modules/.bin/repomix" ]]; then
+  REPOMIX_CMD=("./node_modules/.bin/repomix" -c "$CONFIG")
+elif command -v repomix >/dev/null 2>&1; then
+  REPOMIX_CMD=(repomix -c "$CONFIG")
+elif command -v repomix-md >/dev/null 2>&1; then
+  echo "ERROR: repomix-md found but repomix CLI is required." >&2
+  echo "Hint: install repomix (npm i -D repomix) or provide it via nix shell; repomix-md is not accepted here." >&2
+  exit 3
+elif command -v npx >/dev/null 2>&1; then
+  REPOMIX_CMD=(npx --no-install repomix -c "$CONFIG")
+else
   echo "ERROR: repomix not found (no node_modules/.bin/repomix, no repomix in PATH, no npx)." >&2
   echo "Hint: install repomix locally (npm i -D repomix) or provide repomix via nix shell." >&2
   exit 2
-}
+fi
 
 # Bound runtime to avoid indefinite hangs.
 # Use GNU timeout if available; otherwise use perl alarm fallback.
@@ -64,7 +51,7 @@ run_bounded () {
 }
 
 echo "Running repomix using pinned config: ${CONFIG}"
-run_bounded 120 run_repomix
+run_bounded 120 "${REPOMIX_CMD[@]}"
 
 # Verify output exists
 test -f "$OUT"

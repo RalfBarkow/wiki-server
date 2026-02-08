@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
 
-    repomix-tools.url = "path:/Users/rgb/flakes/repomix-tools";
+    repomix-tools.url = "path:../flakes/repomix-tools";
   };
 
   outputs = { self, nixpkgs, flake-utils, repomix-tools }:
@@ -18,6 +18,9 @@
             pkgs.nodejs_20
             pkgs.git
             pkgs.jq
+            pkgs.ripgrep
+            pkgs.coreutils
+            pkgs.findutils
 
             # Nix-pure Repomix tooling (real repomix binary)
             repomix-tools.packages.${system}.repomix

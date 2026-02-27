@@ -9,6 +9,7 @@ import { once } from 'node:events'
 import supertest from 'supertest'
 
 const serverModule = await import('../index.js')
+const { buildRemoteRequestURLs } = await import('../lib/server.js')
 import defaultargs from '../lib/defaultargs.js'
 import random from '../lib/random_id.js'
 
@@ -81,6 +82,13 @@ describe('proxy', () => {
       })
 
     wiki.cleanup()
+  })
+
+  it('keeps http fallback available for non-loopback remotes on public sites', () => {
+    const plan = buildRemoteRequestURLs('wiki.ralfbarkow.ch', 'fed.wiki.org', 'favicon.png')
+
+    assert.equal(plan.blocked, false)
+    assert.deepEqual(plan.candidates, ['https://fed.wiki.org/favicon.png', 'http://fed.wiki.org/favicon.png'])
   })
 
   it('blocks loopback proxy targets for non-loopback sites', async () => {

@@ -1,6 +1,7 @@
 import { after, before, describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import http from 'node:http'
+import { setTimeout as delay } from 'node:timers/promises'
 import os from 'node:os'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -102,6 +103,46 @@ describe('proxy', () => {
 
     assert.equal(plan.blocked, false)
     assert.deepEqual(plan.candidates, ['https://fed.wiki.org/favicon.png', 'http://fed.wiki.org/favicon.png'])
+  })
+
+  it('buffers slow json responses to avoid partial 200 bodies', async () => {
+    const slowRemote = http.createServer(async (req, res) => {
+      if ((req.url || '').startsWith('/system/sitemap.json')) {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.write('{"items":[')
+        for (let i = 0; i < 42; i += 1) {
+          if (i > 0) res.write(',')
+          res.write(JSON.stringify({ slug: `page-${i}` }))
+          await delay(50)
+        }
+        res.end(']}')
+        return
+      }
+      res.writeHead(404)
+      res.end('not found')
+    })
+
+    slowRemote.listen(0, '127.0.0.1')
+    await once(slowRemote, 'listening')
+    const address = slowRemote.address()
+    if (!address || typeof address === 'string') throw new Error('expected tcp address')
+
+    const wiki = await makeWikiApp({ url: 'http://localhost:55612', port: 55612 })
+    const request = supertest(wiki.app)
+
+    try {
+      await request
+        .get(`/proxy/localhost:${address.port}/system/sitemap.json`)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+        .then(res => {
+          const parsed = JSON.parse(res.text)
+          assert.equal(parsed.items.length, 42)
+        })
+    } finally {
+      await new Promise((resolve, reject) => slowRemote.close(err => (err ? reject(err) : resolve())))
+      wiki.cleanup()
+    }
   })
 
   it('blocks loopback proxy targets for non-loopback sites', async () => {

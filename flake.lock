@@ -75,16 +75,13 @@
       },
       "locked": {
         "lastModified": 1770533230,
-        "narHash": "sha256-ERdGN3lHy7Uv1ZAoQ2XGBCynrjnbyrb35PJkmYm0zxM=",
-        "ref": "refs/heads/main",
-        "rev": "5721c2fca0d99bc58a56a67248cdde851bc62ac8",
-        "revCount": 3,
-        "type": "git",
-        "url": "file:///Users/rgb/flakes/repomix-tools"
+        "narHash": "sha256-iZyEKrA1bbnyPw3PIjyaM4CbremEsDlzR7m/hT9Wiig=",
+        "path": "/Users/rgb/flakes/repomix-tools",
+        "type": "path"
       },
       "original": {
-        "type": "git",
-        "url": "file:///Users/rgb/flakes/repomix-tools"
+        "path": "/Users/rgb/flakes/repomix-tools",
+        "type": "path"
       }
     },
     "root": {

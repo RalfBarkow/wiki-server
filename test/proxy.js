@@ -18,7 +18,15 @@ const makeRemoteServer = async () => {
   const remoteServer = http.createServer((req, res) => {
     lastRequestUrl = req.url || ''
     if ((req.url || '').startsWith('/favicon.png')) {
-      res.writeHead(200, { 'Content-Type': 'image/png' })
+      res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=60',
+        ETag: '"proxy-test"',
+        Connection: 'keep-alive',
+        'Proxy-Connection': 'keep-alive',
+        Upgrade: 'h2c',
+        'Transfer-Encoding': 'chunked',
+      })
       res.end(Buffer.from('proxy-test-png'))
       return
     }
@@ -79,6 +87,11 @@ describe('proxy', () => {
       .then(res => {
         assert.equal(res.body.toString(), 'proxy-test-png')
         assert.equal(remote.lastRequestUrl(), '/favicon.png?x=1')
+        assert.equal(res.headers['cache-control'], 'public, max-age=60')
+        assert.equal(res.headers.etag, '"proxy-test"')
+        assert.notEqual(res.headers.connection, 'keep-alive')
+        assert.equal(res.headers['proxy-connection'], undefined)
+        assert.equal(res.headers.upgrade, undefined)
       })
 
     wiki.cleanup()

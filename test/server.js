@@ -23,6 +23,7 @@ const argv = defaultargs({
   port: 55557,
   security_legacy: true,
   test: true,
+  csp: true,
 })
 
 describe('server', () => {
@@ -69,6 +70,15 @@ describe('server', () => {
       .expect(200)
       .expect('Content-Type', /json/)
       .then(res => assert.deepEqual(res.body, []))
+  })
+
+  it('should set connect-src CSP header when enabled', async () => {
+    await request
+      .get('/system/slugs.json')
+      .expect(200)
+      .then(res => {
+        assert.match(res.headers['content-security-policy'], /connect-src/i)
+      })
   })
 
   it('should create a page', async () => {

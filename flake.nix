@@ -26,6 +26,7 @@
           ];
 
           shellHook = ''
+            export NODE_OPTIONS="''${NODE_OPTIONS:+$NODE_OPTIONS }--experimental-require-module"
             echo
             echo "wiki-server devShell"
             echo

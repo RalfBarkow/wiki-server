@@ -41,6 +41,21 @@ their implementation within this code.
 A wider-ranging conversation is documented in the GitHub ReadMe of the
 founding project, [SFW](https://github.com/WardCunningham/Smallest-Federated-Wiki/blob/master/ReadMe.md).
 
+## Secure Contexts and Local Network Access
+
+Modern Chromium browsers can flag or prompt on public-origin requests to loopback
+targets (for example `http://localhost`) under the Local Network Access model.
+
+Recommended default:
+
+- block loopback federation attempts in the client when the page origin is non-loopback
+- keep localhost federation enabled only for localhost origins
+
+Optional server hardening:
+
+- deploy a CSP that restricts `connect-src` for public origins
+- avoid allowing `http://localhost` and `http://127.0.0.1` in `connect-src` unless the site itself is running on loopback
+
 ## License
 
 You may use the Wiki under either the
